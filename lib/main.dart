@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'ui/user_rating/view_model/user_rating_viewmodel.dart';
+import 'ui/user_rating/widgets/user_rating_screen.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(UserRatingScreen(UserRatingViewModel()));
 }
 
 class MyApp extends StatelessWidget {
