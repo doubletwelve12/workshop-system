@@ -11,6 +11,7 @@ import 'services/auth_service.dart'; // Import AuthService
 import 'repositories/user_repository.dart';
 import 'repositories/foreman_repository.dart';
 import 'repositories/workshop_repository.dart';
+import 'repositories/payroll_repository.dart'; // Import PayrollRepository
 import 'models/app_user_model.dart'; // Import AppUser model
 import 'config/router.dart'; // Import the router configuration
 
@@ -42,6 +43,9 @@ void main() async {
         ProxyProvider2<FirestoreService, UserRepository, WorkshopRepository>(
           update: (context, firestoreService, userRepository, previousWorkshopRepository) =>
               WorkshopRepository(firestoreService, userRepository),
+        ),
+        Provider<PayrollRepository>(
+          create: (_) => PayrollRepository(),
         ),
       ],
       child: const MyApp(), // Your root application widget
