@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:workshop_system/controllers/rating_controller.dart';
-import 'package:workshop_system/repository/rating_repository.dart';
-import 'package:workshop_system/ui/manage_rating/feedback_view_model.dart'; 
-import 'package:workshop_system/ui/manage_rating/user_rating_screen.dart';
+
+import 'viewmodels/manage_rating/feedback_view_model.dart';
+import 'services/dummy_rating_service.dart';
+import 'repositories/rating_repository.dart';
+import 'views/manage_rating/user_rating_screen.dart';
 
 void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        // Initialize dependencies
-        Provider(create: (_) => RatingRepositoryImpl()),
-        ChangeNotifierProvider(
-          create: (context) => FeedbackViewModel(
-            ratingController: RatingController(
-              ratingRepository: Provider.of<RatingRepository>(context, listen: false),
-            ),
-          ),
-        ),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // Mark constructor as const
+  const MyApp({Key? key}) : super(key: key);
+
+  // Move repository inside build or use lazy init, 
+  // because const constructors require all fields to be final and initialized at compile-time
+  // So better move repository inside build or use a getter.
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Workshop Management System',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    final repository = RatingRepository(
+      ratingService: RatingService(),
+    );
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => FeedbackViewModel(
+            ratingRepository: repository,
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Car Workshop Feedback',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blueGrey,
+        ),
+        home: UserRatingScreen(),
       ),
-      home: const UserRatingScreen(),
     );
   }
 }
