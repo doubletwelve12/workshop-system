@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/manage_rating/feedback_view_model.dart';
 import 'feedback_form_widget.dart';
 import 'rating_star_widget.dart';
+import 'all_ratings_screen.dart';
 
 class UserRatingScreen extends StatefulWidget {
   const UserRatingScreen({Key? key}) : super(key: key);
@@ -50,43 +51,60 @@ class _UserRatingScreenState extends State<UserRatingScreen>
     super.dispose();
   }
 
-  Future<void> _submitFeedback(BuildContext context) async {
-    final viewModel = Provider.of<FeedbackViewModel>(context, listen: false);
-
-    // Trigger validation state
-    viewModel.setShowValidationErrors(true);
-
-    if (viewModel.customerNameController.text.trim().isEmpty || 
-        viewModel.jobTypeController.text.trim().isEmpty ||
-        viewModel.ratingStars == 0) {
-      _showCustomSnackBar(
-        context, 
-        "Please fill in all required fields", 
-        Icons.warning_amber_rounded,
-        Colors.orange,
-      );
-      return;
-    }
-
-    // Show loading state
-    _showLoadingDialog(context);
-
-    final success = await viewModel.submitRating();
-    
-    // Hide loading dialog
-    Navigator.of(context).pop();
-
-    if (success) {
-      _showSuccessDialog(context);
-    } else {
-      _showCustomSnackBar(
-        context, 
-        "Submission failed. Please try again", 
-        Icons.error_outline,
-        Colors.red,
-      );
-    }
-  }
+  // Widget _buildNavigationDrawer(BuildContext context) {
+  //   return Drawer(
+  //     child: ListView(
+  //       padding: EdgeInsets.zero,
+  //       children: [
+  //         const DrawerHeader(
+  //           decoration: BoxDecoration(
+  //             color: Colors.blue,
+  //           ),
+  //           child: Text(
+  //             'Navigation Menu',
+  //             style: TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 24,
+  //             ),
+  //           ),
+  //         ),
+  //         ListTile(
+  //           leading: const Icon(Icons.star),
+  //           title: const Text('Rating Screen'),
+  //           onTap: () {
+  //             Navigator.pop(context); // Close the drawer
+  //             // Only navigate if we're not already on the rating screen
+  //             if (!ModalRoute.of(context)!.isCurrent) {
+  //               Navigator.pushReplacement(
+  //                 context,
+  //                 MaterialPageRoute(
+  //                   builder: (context) => const UserRatingScreen(),
+  //                 ),
+  //               );
+  //             }
+  //           },
+  //         ),
+  //         ListTile(
+  //           leading: const Icon(Icons.list),
+  //           title: const Text('All Ratings Screen'),
+  //           onTap: () {
+  //             Navigator.pop(context); // Close the drawer
+  //             // Only navigate if we're not already on the all ratings screen
+  //             if (!ModalRoute.of(context)!.isCurrent) {
+  //               Navigator.pushReplacement(
+  //                 context,
+  //                 MaterialPageRoute(
+  //                   builder: (context) => const AllRatingsScreen(),
+  //                 ),
+  //               );
+  //             }
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  
 
   void _showLoadingDialog(BuildContext context) {
     showDialog(
@@ -147,16 +165,14 @@ class _UserRatingScreenState extends State<UserRatingScreen>
             onPressed: () {
               Navigator.of(context).pop(); // Close the dialog
               
-              // Clear the form for next user
-              final viewModel = Provider.of<FeedbackViewModel>(context, listen: false);
-              viewModel.customerNameController.clear();
-              viewModel.jobTypeController.clear();
-              viewModel.commentController.clear();
-              viewModel.setRating(0);
-              viewModel.setShowValidationErrors(false); // Reset validation state
+              // Clear the form using the correct method name
+              final viewModel = Provider.of<FeedbackViewModel>(
+                context, 
+                listen: false
+              );
+              viewModel.clearForm();
               
-              // Optional: Go back to previous screen if there is one
-              // Check if there's a previous route before popping
+              // Return to previous screen if possible
               if (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
               }
@@ -168,7 +184,12 @@ class _UserRatingScreenState extends State<UserRatingScreen>
     );
   }
 
-  void _showCustomSnackBar(BuildContext context, String message, IconData icon, Color color) {
+  void _showCustomSnackBar(
+    BuildContext context, 
+    String message, 
+    IconData icon, 
+    Color color
+  ) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -180,7 +201,8 @@ class _UserRatingScreenState extends State<UserRatingScreen>
         ),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -190,6 +212,7 @@ class _UserRatingScreenState extends State<UserRatingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      drawer: _buildNavigationDrawer(context),
       appBar: AppBar(
         title: const Text(
           "Rating and Review",
@@ -199,6 +222,12 @@ class _UserRatingScreenState extends State<UserRatingScreen>
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: Builder(  // This is the key fix
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
       ),
       body: Consumer<FeedbackViewModel>(
         builder: (context, viewModel, child) {
@@ -229,7 +258,7 @@ class _UserRatingScreenState extends State<UserRatingScreen>
                         ),
                         child: Column(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.engineering,
                               size: 48,
                               color: Colors.white,
@@ -244,45 +273,36 @@ class _UserRatingScreenState extends State<UserRatingScreen>
                               ),
                             ),
                             const SizedBox(height: 8),
-                            
-                            // Average Rating Display
-                            Consumer<FeedbackViewModel>(
-                              builder: (context, viewModel, child) {
-                                // TODO: Replace with actual average from Firebase
-                                final averageRating = 4.2; // Dummy data for now
-                                
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  viewModel.averageRating.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
                                   children: [
+                                    RatingStarWidget(
+                                      rating: viewModel.averageRating.round(),
+                                      size: 20,
+                                      isInteractive: false,
+                                    ),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      averageRating.toStringAsFixed(1),
+                                      "${viewModel.totalRatingsCount} reviews",
                                       style: const TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        fontSize: 12,
+                                        color: Colors.white70,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Column(
-                                      children: [
-                                        RatingStarWidget(
-                                          rating: averageRating.round(),
-                                          size: 20,
-                                          isInteractive: false,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        const Text(
-                                          "125 reviews", // TODO: Replace with actual count
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white70,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ],
-                                );
-                              },
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -321,68 +341,58 @@ class _UserRatingScreenState extends State<UserRatingScreen>
                               ],
                             ),
                             const SizedBox(height: 16),
-                            
-                            Consumer<FeedbackViewModel>(
-                              builder: (context, viewModel, child) {
-                                final ratingLabels = [
-                                  'Poor',
-                                  'Fair', 
-                                  'Good',
-                                  'Very Good',
-                                  'Excellent'
-                                ];
-                                
-                                return Column(
-                                  children: [
-                                    RatingStarWidget(
-                                      rating: viewModel.ratingStars,
-                                      size: 48,
-                                      onRatingSelected: (rating) {
-                                        viewModel.setRating(rating);
-                                      },
-                                    ),
-                                    const SizedBox(height: 12),
-                                    AnimatedSwitcher(
-                                      duration: const Duration(milliseconds: 300),
-                                      child: viewModel.ratingStars > 0
-                                          ? Container(
-                                              key: ValueKey(viewModel.ratingStars),
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 8,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue[50],
-                                                borderRadius: BorderRadius.circular(16),
-                                              ),
-                                              child: Text(
-                                                ratingLabels[viewModel.ratingStars - 1],
-                                                style: TextStyle(
-                                                  color: Colors.blue[700],
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            )
-                                          : const SizedBox.shrink(),
-                                    ),
-                                    
-                                    // Required field indicator
-                                    if (viewModel.showValidationErrors && viewModel.ratingStars == 0)
-                                      const Padding(
-                                        padding: EdgeInsets.only(top: 8),
-                                        child: Text(
-                                          "*Required",
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
+                            Column(
+                              children: [
+                                RatingStarWidget(
+                                  rating: viewModel.ratingStars,
+                                  size: 48,
+                                  onRatingSelected: viewModel.setRating,
+                                ),
+                                const SizedBox(height: 12),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  child: viewModel.ratingStars > 0
+                                      ? Container(
+                                          key: ValueKey(viewModel.ratingStars),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
                                           ),
-                                        ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue[50],
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          child: Text(
+                                            const [
+                                              'Poor',
+                                              'Fair', 
+                                              'Good',
+                                              'Very Good',
+                                              'Excellent'
+                                            ][viewModel.ratingStars - 1],
+                                            style: TextStyle(
+                                              color: Colors.blue[700],
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(),
+                                ),
+                                if (viewModel.showValidationErrors && 
+                                    viewModel.ratingStars == 0)
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 8),
+                                    child: Text(
+                                      "*Required",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                  ],
-                                );
-                              },
+                                    ),
+                                  ),
+                              ],
                             ),
                           ],
                         ),
@@ -397,63 +407,62 @@ class _UserRatingScreenState extends State<UserRatingScreen>
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: const FeedbackFormWidget(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: FeedbackFormWidget(),
                       ),
                     ),
                     
                     const SizedBox(height: 32),
                     
                     // Submit Button
-                    Container(
+                    SizedBox(
                       height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: LinearGradient(
-                          colors: [Colors.blue[600]!, Colors.blue[500]!],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
                       child: ElevatedButton(
-                        onPressed: viewModel.isSubmitting 
-                            ? null 
-                            : () => _submitFeedback(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
+                          backgroundColor: Colors.blue[600],
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
+                          elevation: 4,
                         ),
+                        onPressed: () async {
+                          // Validate form
+                          viewModel.setShowValidationErrors(true);
+                          
+                          if (!viewModel.isFormValid) {
+                            _showCustomSnackBar(
+                              context, 
+                              "Please fill in all required fields", 
+                              Icons.warning_amber_rounded,
+                              Colors.orange,
+                            );
+                            return;
+                          }
+                          
+                          _showLoadingDialog(context);
+                          final success = await viewModel.submitRating(context);
+                          Navigator.of(context).pop(); // Close loading dialog
+                          
+                          if (success) {
+                            _showSuccessDialog(context);
+                          } else {
+                            _showCustomSnackBar(
+                              context, 
+                              "Submission failed. Please try again", 
+                              Icons.error_outline,
+                              Colors.red,
+                            );
+                          }
+                        },
                         child: viewModel.isSubmitting
-                            ? const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    "Submitting...",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
                               )
                             : const Text(
                                 "Submit Feedback",
@@ -486,4 +495,43 @@ class _UserRatingScreenState extends State<UserRatingScreen>
       ),
     );
   }
+
+  Widget _buildNavigationDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
+            child: Text(
+              'Navigation Menu',
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.star),
+            title: const Text('Rating Screen'),
+            onTap: () {
+              Navigator.pop(context);
+              if (ModalRoute.of(context)?.settings.name != '/rating') {
+                Navigator.pushReplacementNamed(context, '/rating');
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list),
+            title: const Text('All Ratings Screen'),
+            onTap: () {
+              Navigator.pop(context);
+              if (ModalRoute.of(context)?.settings.name != '/all-ratings') {
+                Navigator.pushReplacementNamed(context, '/all-ratings');
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  
 }

@@ -1,27 +1,27 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'viewmodels/manage_rating/feedback_view_model.dart';
-import 'services/dummy_rating_service.dart';
+import 'services/rating_service.dart';  // Updated import
 import 'repositories/rating_repository.dart';
 import 'views/manage_rating/user_rating_screen.dart';
+import 'views/manage_rating/all_ratings_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // Mark constructor as const
   const MyApp({Key? key}) : super(key: key);
 
-  // Move repository inside build or use lazy init, 
-  // because const constructors require all fields to be final and initialized at compile-time
-  // So better move repository inside build or use a getter.
-
   @override
+
   Widget build(BuildContext context) {
     final repository = RatingRepository(
-      ratingService: RatingService(),
+      ratingService: RatingService(), // Now using real Firebase service
     );
 
     return MultiProvider(
@@ -38,8 +38,16 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blueGrey,
         ),
-        home: UserRatingScreen(),
+        // Set initial route
+        initialRoute: '/rating',
+        // Define named routes
+        routes: {
+          '/rating': (context) => const UserRatingScreen(),
+          '/all-ratings': (context) => const AllRatingsScreen(),
+        },
       ),
     );
   }
+
+  
 }
