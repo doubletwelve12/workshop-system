@@ -112,7 +112,7 @@ class MainMenuView extends StatelessWidget {
                               _buildMenuItem(
                                 context,
                                 'Manage Payroll', // Button text
-                                () => context.push('/manage-payroll/pending'), // Navigation action
+                                () => context.push('/pending-payroll'), // Navigation action
                               ),
                               const SizedBox(height: 16.0),
                               // Workshop Owner can view all ratings for their workshop
@@ -122,6 +122,12 @@ class MainMenuView extends StatelessWidget {
                                 () => context.push('/all-ratings'),
                               ),
                             ],
+                            const SizedBox(height: 16.0),
+                            _buildMenuItem(
+                                context, 
+                                'Manage Schedule Demo', 
+                                () => context.push('/demo')
+                            )
                           ],
                         ),
                       ),

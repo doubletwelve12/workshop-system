@@ -1,8 +1,14 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:workshop_system/firebase_options.dart';
+import 'package:provider/provider.dart'; // Import provider package
+import 'package:go_router/go_router.dart';
+import 'package:workshop_system/services/payment_api_service.dart';
+import 'package:workshop_system/viewmodels/manage_payroll/pending_payroll_viewmodel.dart';
+import 'package:workshop_system/viewmodels/manage_payroll/salary_detail_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 // Import your services and repositories
@@ -12,10 +18,10 @@ import 'services/rating_service.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/foreman_repository.dart';
 import 'repositories/workshop_repository.dart';
-import 'repositories/payroll_repository.dart';
-import 'repositories/rating_repository.dart';
-import 'models/app_user_model.dart';
-import 'config/router.dart';
+import 'repositories/payroll_repository.dart'; // Import PayrollRepository
+import 'models/app_user_model.dart'; // Import AppUser model
+import 'config/router.dart'; // Import the router configuration
+import 'data/repositories/schedule_repository.dart';
 import 'viewmodels/manage_rating/feedback_view_model.dart';
 
 void main() async {
@@ -23,10 +29,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // Initialize Firebase App Check if needed
-  // await FirebaseAppCheck.instance.activate();
-  
   runApp(
     MultiProvider(
       providers: [
@@ -37,6 +39,8 @@ void main() async {
         Provider<AuthService>(
           create: (_) => AuthService(),
         ),
+        Provider<PaymentServiceFactory>(
+          create: (_) => PaymentServiceFactory(),
         Provider<RatingService>(
           create: (_) => RatingService(),
         ),
@@ -54,8 +58,13 @@ void main() async {
           update: (context, firestoreService, userRepository, previousWorkshopRepository) =>
               WorkshopRepository(firestoreService, userRepository),
         ),
-        Provider<PayrollRepository>(
-          create: (_) => PayrollRepository(),
+        ProxyProvider<FirestoreService, PayrollRepository>(
+          update: (context, firestoreService, previousPayrollRepository) =>
+              PayrollRepository(firestoreService),
+        ),
+        ProxyProvider<FirestoreService, ScheduleRepository>(
+          update: (context, firestoreService, previousScheduleRepository) =>
+              ScheduleRepository(firestoreService: firestoreService),
         ),
         
         // Rating Repository (depends on AuthService and RatingService)
@@ -86,6 +95,8 @@ void main() async {
     ),
   );
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
