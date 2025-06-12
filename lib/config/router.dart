@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:workshop_system/models/foreman_model.dart';
+import 'package:workshop_system/repositories/payroll_repository.dart';
+import 'package:workshop_system/services/payment_api_service.dart';
+import 'package:workshop_system/viewmodels/manage_payroll/pending_payroll_viewmodel.dart';
 
 import '../services/auth_service.dart';
 import '../views/auth/welcome_view.dart';
@@ -18,6 +22,7 @@ import '../views/manage_payroll/salary_detail_view.dart'; // Import SalaryDetail
 import '../models/payroll_model.dart'; // For Payroll type
 
 final GoRouter router = GoRouter(
+  
   routes: <RouteBase>[
     GoRoute(
       path: '/',
@@ -27,6 +32,7 @@ final GoRouter router = GoRouter(
         return authService.getCurrentUser() == null ? '/welcome' : '/home';
       },
     ),
+ 
     GoRoute(
       path: '/foreman/search-workshops',
       builder: (BuildContext context, GoRouterState state) {
@@ -64,28 +70,24 @@ final GoRouter router = GoRouter(
       },
     ),
     // New Payroll Routes
-    GoRoute(
-      path: '/manage-payroll/pending',
-      name: 'pendingPayrolls',
-      builder: (BuildContext context, GoRouterState state) {
-        return const PendingPayrollView();
-      },
+     GoRoute(
+      path: '/pending-payroll',
+      builder: (context, state) => ChangeNotifierProvider(
+        create: (context) => PendingPayrollViewModel(
+          Provider.of<PayrollRepository>(context, listen: false),
+          Provider.of<PaymentServiceFactory>(context, listen: false),
+        ),
+        child: PendingPayrollView(),
+      ),
     ),
     GoRoute(
-      path: '/manage-payroll/salary-detail',
-      name: 'salaryDetail',
-      builder: (BuildContext context, GoRouterState state) {
-        if (state.extra != null && state.extra is Payroll) {
-          final Payroll payroll = state.extra as Payroll;
-          return SalaryDetailView(payroll: payroll);
-        } else {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Error')),
-            body: const Center(child: Text('Error: Payroll data not provided.')),
-          );
-        }
-      },
+     path: '/salary-detail',
+     builder: (context, state) {
+        final foreman = state.extra as Foreman;
+        return SalaryDetailView(foreman: foreman); 
+      },  
     ),
+    
     GoRoute(
       path: '/profile/foreman/:foremanId',
       builder: (BuildContext context, GoRouterState state) {
@@ -156,5 +158,7 @@ final GoRouter router = GoRouter(
         return Scaffold(appBar: AppBar(title: const Text('Manage Schedule')), body: const Center(child: Text('Manage Schedule Content')));
       },
     ),
+    
   ],
+  
 );

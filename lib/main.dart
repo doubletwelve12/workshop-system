@@ -4,6 +4,9 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:workshop_system/firebase_options.dart';
 import 'package:provider/provider.dart'; // Import provider package
 import 'package:go_router/go_router.dart';
+import 'package:workshop_system/services/payment_api_service.dart';
+import 'package:workshop_system/viewmodels/manage_payroll/pending_payroll_viewmodel.dart';
+import 'package:workshop_system/viewmodels/manage_payroll/salary_detail_viewmodel.dart';
 
 // Import your services and repositories
 import 'services/firestore_service.dart';
@@ -20,6 +23,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // await FirebaseAppCheck.instance.activate();
+
   runApp(
     MultiProvider(
       providers: [
@@ -29,6 +34,9 @@ void main() async {
         ),
         Provider<AuthService>(
           create: (_) => AuthService(),
+        ),
+        Provider<PaymentServiceFactory>(
+          create: (_) => PaymentServiceFactory(),
         ),
 
         // Repository Providers (dependent on FirestoreService)
@@ -44,14 +52,18 @@ void main() async {
           update: (context, firestoreService, userRepository, previousWorkshopRepository) =>
               WorkshopRepository(firestoreService, userRepository),
         ),
-        Provider<PayrollRepository>(
-          create: (_) => PayrollRepository(),
+        ProxyProvider<FirestoreService, PayrollRepository>(
+          update: (context, firestoreService, previousPayrollRepository) =>
+              PayrollRepository(firestoreService),
         ),
+        
       ],
       child: const MyApp(), // Your root application widget
     ),
   );
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
