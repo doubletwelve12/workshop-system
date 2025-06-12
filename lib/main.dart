@@ -1,3 +1,4 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -17,6 +18,7 @@ import 'repositories/workshop_repository.dart';
 import 'repositories/payroll_repository.dart'; // Import PayrollRepository
 import 'models/app_user_model.dart'; // Import AppUser model
 import 'config/router.dart'; // Import the router configuration
+import 'data/repositories/schedule_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +58,10 @@ void main() async {
           update: (context, firestoreService, previousPayrollRepository) =>
               PayrollRepository(firestoreService),
         ),
-        
+        ProxyProvider<FirestoreService, ScheduleRepository>(
+          update: (context, firestoreService, previousScheduleRepository) =>
+              ScheduleRepository(firestoreService: firestoreService),
+        ),
       ],
       child: const MyApp(), // Your root application widget
     ),
