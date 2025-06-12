@@ -132,6 +132,10 @@ class DemoHomePage extends StatelessWidget {
   }
 }
 
+// Import Rating Screens
+import '../views/manage_rating/user_rating_screen.dart';
+import '../views/manage_rating/all_ratings_screen.dart';
+
 final GoRouter router = GoRouter(
   
   routes: <RouteBase>[
@@ -178,6 +182,30 @@ final GoRouter router = GoRouter(
       path: '/home', // This will now be the main menu
       builder: (BuildContext context, GoRouterState state) {
         return const MainMenuView();
+      },
+    ),
+    // Rating Routes
+    GoRoute(
+      path: '/customer-rating',
+      name: 'customerRating',
+      builder: (BuildContext context, GoRouterState state) {
+        return const UserRatingScreen();
+      },
+    ),
+    GoRoute(
+      path: '/my-ratings',
+      name: 'myRatings',
+      builder: (BuildContext context, GoRouterState state) {
+        // This will show ratings filtered for the current foreman
+        return const AllRatingsScreen();
+      },
+    ),
+    GoRoute(
+      path: '/all-ratings',
+      name: 'allRatings',
+      builder: (BuildContext context, GoRouterState state) {
+        // This will show all ratings for workshop owners
+        return const AllRatingsScreen();
       },
     ),
     // New Payroll Routes

@@ -75,6 +75,20 @@ class MainMenuView extends StatelessWidget {
                                 'Search Workshops',
                                 () => viewModel.navigateToWorkshopSearch(context),
                               ),
+                              const SizedBox(height: 16.0),
+                              // Customer Rating Section
+                              _buildMenuItem(
+                                context,
+                                'Customer Rating',
+                                () => context.push('/customer-rating'),
+                              ),
+                              const SizedBox(height: 16.0),
+                              // View My Ratings Section
+                              _buildMenuItem(
+                                context,
+                                'My Ratings',
+                                () => context.push('/my-ratings'),
+                              ),
                             ],
                             if (viewModel.isWorkshopOwner) ...[
                               _buildMenuItem(
@@ -99,6 +113,13 @@ class MainMenuView extends StatelessWidget {
                                 context,
                                 'Manage Payroll', // Button text
                                 () => context.push('/pending-payroll'), // Navigation action
+                              ),
+                              const SizedBox(height: 16.0),
+                              // Workshop Owner can view all ratings for their workshop
+                              _buildMenuItem(
+                                context,
+                                'All Workshop Ratings',
+                                () => context.push('/all-ratings'),
                               ),
                             ],
                             const SizedBox(height: 16.0),

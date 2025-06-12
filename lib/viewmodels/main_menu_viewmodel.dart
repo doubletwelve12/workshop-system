@@ -38,7 +38,9 @@ class MainMenuViewModel extends ChangeNotifier {
       final firebaseUser = _authService.getCurrentUser();
       if (firebaseUser != null) {
         debugPrint('[MainMenuViewModel] Firebase User ID: ${firebaseUser.uid}');
-        _currentUser = await _userRepository.getUser(firebaseUser.uid);
+        
+        // FIXED: Use AuthService instead of UserRepository for consistency
+        _currentUser = await _authService.getCurrentAppUser();
         debugPrint('[MainMenuViewModel] AppUser data: ${_currentUser?.toMap().toString()}');
 
         if (_currentUser != null) {
