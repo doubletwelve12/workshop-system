@@ -17,7 +17,7 @@ class AppUser {
 
   factory AppUser.fromMap(Map<String, dynamic> map, String documentId) {
     return AppUser(
-      id: map['id'],
+      id: documentId,
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       contactNumber: map['contactNumber'] ?? '',

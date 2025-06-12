@@ -44,20 +44,19 @@ class WorkshopRegisterViewModel extends ChangeNotifier {
     }
 
     try {
-      // FIXED: Pass the required parameters to registerWithEmailAndPassword
-      UserCredential? userCredential = await _authService.registerWithEmailAndPassword(
-        email, 
-        password,
-        name: workshopName, // Using workshop name as user name
-        contactNumber: contactInfo,
-        role: 'workshop_owner',
-      );
-      
+      UserCredential? userCredential = await _authService.registerWithEmailAndPassword(email, password);
       if (userCredential != null && userCredential.user != null) {
         final String userId = userCredential.user!.uid;
 
-        // User document is already created by AuthService.registerWithEmailAndPassword
-        // No need to create it again here
+        // Create AppUser document
+        final AppUser appUser = AppUser(
+          id: userId,
+          name: workshopName, // Using workshop name as user name for simplicity
+          email: email,
+          contactNumber: contactInfo,
+          role: 'workshop_owner',
+        );
+        await _userRepository.createUserDocument(appUser);
 
         // Create Workshop profile
         final Workshop workshop = Workshop(
