@@ -24,6 +24,9 @@ import 'package:workshop_system/views/manage_schedule/create_schedule_page.dart'
 import 'package:workshop_system/views/manage_schedule/my_schedule_page.dart';
 import 'package:workshop_system/views/manage_schedule/schedule_overview_page.dart';
 import 'package:workshop_system/views/manage_schedule/slot_selection_page.dart';
+// Import Rating Screens
+import '../views/manage_rating/user_rating_screen.dart';
+import '../views/manage_rating/all_ratings_screen.dart';
 
 class DemoHomePage extends StatelessWidget {
   const DemoHomePage({super.key});
@@ -132,6 +135,8 @@ class DemoHomePage extends StatelessWidget {
   }
 }
 
+
+
 final GoRouter router = GoRouter(
   
   routes: <RouteBase>[
@@ -178,6 +183,30 @@ final GoRouter router = GoRouter(
       path: '/home', // This will now be the main menu
       builder: (BuildContext context, GoRouterState state) {
         return const MainMenuView();
+      },
+    ),
+    // Rating Routes
+    GoRoute(
+      path: '/customer-rating',
+      name: 'customerRating',
+      builder: (BuildContext context, GoRouterState state) {
+        return const UserRatingScreen();
+      },
+    ),
+    GoRoute(
+      path: '/my-ratings',
+      name: 'myRatings',
+      builder: (BuildContext context, GoRouterState state) {
+        // This will show ratings filtered for the current foreman
+        return const AllRatingsScreen();
+      },
+    ),
+    GoRoute(
+      path: '/all-ratings',
+      name: 'allRatings',
+      builder: (BuildContext context, GoRouterState state) {
+        // This will show all ratings for workshop owners
+        return const AllRatingsScreen();
       },
     ),
     // New Payroll Routes
