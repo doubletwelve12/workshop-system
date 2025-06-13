@@ -43,19 +43,20 @@ class ForemanRegisterViewModel extends ChangeNotifier {
     }
 
     try {
-      UserCredential? userCredential = await _authService.registerWithEmailAndPassword(email, password);
+      // FIXED: Pass the required parameters to registerWithEmailAndPassword
+      UserCredential? userCredential = await _authService.registerWithEmailAndPassword(
+        email, 
+        password,
+        name: fullName,
+        contactNumber: contactInfo,
+        role: 'foreman',
+      );
+      
       if (userCredential != null && userCredential.user != null) {
         final String userId = userCredential.user!.uid;
 
-        // Create AppUser document
-        final AppUser appUser = AppUser(
-          id: userId,
-          name: fullName,
-          email: email,
-          contactNumber: contactInfo,
-          role: 'foreman',
-        );
-        await _userRepository.createUserDocument(appUser);
+        // User document is already created by AuthService.registerWithEmailAndPassword
+        // No need to create it again here
 
         // Create Foreman profile
         final Foreman foremanProfile = Foreman(

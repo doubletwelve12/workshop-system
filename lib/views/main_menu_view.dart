@@ -121,6 +121,13 @@ class MainMenuView extends StatelessWidget {
                                 'All Workshop Ratings',
                                 () => context.push('/all-ratings'),
                               ),
+                              const SizedBox(height: 16.0),
+                              // Workshop Owner can view all ratings for their workshop
+                              _buildMenuItem(
+                                context,
+                                'All Workshop Ratings',
+                                () => context.push('/all-ratings'),
+                              ),
                             ],
                             const SizedBox(height: 16.0),
                             _buildMenuItem(
