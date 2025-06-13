@@ -24,6 +24,9 @@ import 'package:workshop_system/views/manage_schedule/create_schedule_page.dart'
 import 'package:workshop_system/views/manage_schedule/my_schedule_page.dart';
 import 'package:workshop_system/views/manage_schedule/schedule_overview_page.dart';
 import 'package:workshop_system/views/manage_schedule/slot_selection_page.dart';
+// Import Rating Screens
+import '../views/manage_rating/user_rating_screen.dart';
+import '../views/manage_rating/all_ratings_screen.dart';
 
 class DemoHomePage extends StatelessWidget {
   const DemoHomePage({super.key});
@@ -132,9 +135,7 @@ class DemoHomePage extends StatelessWidget {
   }
 }
 
-// Import Rating Screens
-import '../views/manage_rating/user_rating_screen.dart';
-import '../views/manage_rating/all_ratings_screen.dart';
+
 
 final GoRouter router = GoRouter(
   

@@ -19,6 +19,7 @@ import 'repositories/user_repository.dart';
 import 'repositories/foreman_repository.dart';
 import 'repositories/workshop_repository.dart';
 import 'repositories/payroll_repository.dart'; // Import PayrollRepository
+import 'repositories/rating_repository.dart'; // Import RatingRepository
 import 'models/app_user_model.dart'; // Import AppUser model
 import 'config/router.dart'; // Import the router configuration
 import 'data/repositories/schedule_repository.dart';
@@ -36,11 +37,13 @@ void main() async {
         Provider<FirestoreService>(
           create: (_) => FirestoreService(),
         ),
-        Provider<AuthService>(
-          create: (_) => AuthService(),
+        ProxyProvider<FirestoreService, AuthService>(
+          update: (context, firestoreService, previousAuthService) =>
+              AuthService(firestoreService: firestoreService),
         ),
         Provider<PaymentServiceFactory>(
           create: (_) => PaymentServiceFactory(),
+        ), // Correctly close PaymentServiceFactory provider
         Provider<RatingService>(
           create: (_) => RatingService(),
         ),

@@ -228,8 +228,8 @@ Future<void> _initializeData() async {
   // Get current foreman name for display
   Future<String?> getCurrentForemanName() async {
     try {
-      final foreman = await authService.getCurrentForeman();
-      return foreman?.foremanName;
+      final appUser = await authService.getCurrentAppUser();
+      return appUser?.name;
     } catch (e) {
       print('Error getting foreman name: $e');
       return null;
