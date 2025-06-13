@@ -3,17 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:workshop_system/firebase_options.dart';
-import 'package:provider/provider.dart'; // Import provider package
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workshop_system/services/payment_api_service.dart';
 import 'package:workshop_system/viewmodels/manage_payroll/pending_payroll_viewmodel.dart';
 import 'package:workshop_system/viewmodels/manage_payroll/salary_detail_viewmodel.dart';
 import 'package:provider/provider.dart';
 
-// Import your services and repositories
+import 'firebase_options.dart';
 import 'services/firestore_service.dart';
 import 'services/auth_service.dart';
+import 'services/inventory_service.dart';
+import 'config/router.dart';
+
+// ✅ Import your InventoryViewModel
+import 'viewmodels/inventory/inventory_viewmodel.dart';
 import 'services/rating_service.dart'; 
 import 'repositories/user_repository.dart';
 import 'repositories/foreman_repository.dart';
@@ -21,21 +25,25 @@ import 'repositories/workshop_repository.dart';
 import 'repositories/payroll_repository.dart'; // Import PayrollRepository
 import 'repositories/rating_repository.dart'; // Import RatingRepository
 import 'models/app_user_model.dart'; // Import AppUser model
-import 'config/router.dart'; // Import the router configuration
 import 'data/repositories/schedule_repository.dart';
 import 'viewmodels/manage_rating/feedback_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
     MultiProvider(
       providers: [
         // Service Providers
+        ChangeNotifierProvider<InventoryViewModel>(
+          create: (_) => InventoryViewModel(),
+        ),
         Provider<FirestoreService>(
           create: (_) => FirestoreService(),
+        ),
+        Provider<InventoryService>(
+          create: (_) => InventoryService(),
         ),
         ProxyProvider<FirestoreService, AuthService>(
           update: (context, firestoreService, previousAuthService) =>
@@ -50,16 +58,16 @@ void main() async {
 
         // Repository Providers (dependent on services)
         ProxyProvider<FirestoreService, UserRepository>(
-          update: (context, firestoreService, previousUserRepository) =>
-              UserRepository(firestoreService),
+          update: (_, firestoreService, __) => UserRepository(firestoreService),
         ),
         ProxyProvider<FirestoreService, ForemanRepository>(
-          update: (context, firestoreService, previousForemanRepository) =>
-              ForemanRepository(firestoreService),
+          update:
+              (_, firestoreService, __) => ForemanRepository(firestoreService),
         ),
         ProxyProvider2<FirestoreService, UserRepository, WorkshopRepository>(
-          update: (context, firestoreService, userRepository, previousWorkshopRepository) =>
-              WorkshopRepository(firestoreService, userRepository),
+          update:
+              (_, firestoreService, userRepository, __) =>
+                  WorkshopRepository(firestoreService, userRepository),
         ),
         ProxyProvider<FirestoreService, PayrollRepository>(
           update: (context, firestoreService, previousPayrollRepository) =>
@@ -109,9 +117,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: router,
       title: 'Workshop Management System',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
     );
   }
 }
